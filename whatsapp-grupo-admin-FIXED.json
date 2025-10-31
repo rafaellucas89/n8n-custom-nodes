@@ -1,0 +1,282 @@
+{
+  "name": "🔥 WhatsApp Automation FIXED - Grupo Administração",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "trigger-schedule",
+      "name": "⏰ Trigger Diário (9h, SEG-SEX)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "config-1",
+              "leftValue": "={{ $now.format('dddd') }}",
+              "rightValue": "Saturday",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "config-2",
+              "leftValue": "={{ $now.format('dddd') }}",
+              "rightValue": "Sunday",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "verificar-dia-semana",
+      "name": "🗓️ Verificar Dia da Semana",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "prep-1",
+              "name": "groupId",
+              "value": "120363162966886315@g.us",
+              "type": "string"
+            },
+            {
+              "id": "prep-2", 
+              "name": "message",
+              "value": "🌟 *Bom dia, Administração TOP WEB!*\n\n📅 Hoje é {{ $now.format('dddd, DD/MM/YYYY') }}\n⏰ {{ $now.format('HH:mm') }}\n\n✅ Sistema funcionando perfeitamente!\n🔥 Workflows ativos e monitorados\n📊 Dashboard automático em funcionamento\n\n*Tenha um ótimo dia de trabalho!* 🚀\n\n_Mensagem automática - n8n API_",
+              "type": "string"
+            },
+            {
+              "id": "prep-3",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "preparar-mensagem",
+      "name": "📝 Preparar Mensagem",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendText", 
+        "phone": "={{ $json.groupId }}",
+        "text": "={{ $json.message }}",
+        "options": {
+          "delay": 1000,
+          "linkPreview": false
+        }
+      },
+      "id": "enviar-grupo-admin",
+      "name": "💬 Enviar para Grupo Admin",
+      "type": "whatsAppZAPI",
+      "typeVersion": 1,
+      "position": [800, 300],
+      "credentials": {
+        "whatsAppZAPIApi": {
+          "id": "zapi-credentials",
+          "name": "Z-API WhatsApp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "log-1",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "log-2",
+              "name": "sentTo",
+              "value": "ADMINISTRAÇÃO - TOP WEB",
+              "type": "string"
+            },
+            {
+              "id": "log-3",
+              "name": "groupId", 
+              "value": "120363162966886315@g.us",
+              "type": "string"
+            },
+            {
+              "id": "log-4",
+              "name": "executedAt",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "log-5",
+              "name": "messageLength",
+              "value": "={{ $('preparar-mensagem').item.json.message.length }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "log-resultado",
+      "name": "📊 Log do Resultado", 
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "erro-1",
+              "name": "status",
+              "value": "weekend_skip",
+              "type": "string"
+            },
+            {
+              "id": "erro-2",
+              "name": "reason",
+              "value": "Fim de semana - execução pulada",
+              "type": "string"
+            },
+            {
+              "id": "erro-3",
+              "name": "day",
+              "value": "={{ $now.format('dddd') }}",
+              "type": "string"
+            },
+            {
+              "id": "erro-4",
+              "name": "skippedAt",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "log-weekend-skip",
+      "name": "📅 Log Fim de Semana", 
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [600, 500]
+    }
+  ],
+  "connections": {
+    "⏰ Trigger Diário (9h, SEG-SEX)": {
+      "main": [
+        [
+          {
+            "node": "🗓️ Verificar Dia da Semana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🗓️ Verificar Dia da Semana": {
+      "main": [
+        [
+          {
+            "node": "📝 Preparar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "📅 Log Fim de Semana",
+            "type": "main", 
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📝 Preparar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "💬 Enviar para Grupo Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💬 Enviar para Grupo Admin": {
+      "main": [
+        [
+          {
+            "node": "📊 Log do Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": {},
+  "tags": [
+    {
+      "createdAt": "2025-10-31T18:30:00.000Z",
+      "updatedAt": "2025-10-31T18:30:00.000Z", 
+      "id": "whatsapp-automation-fixed",
+      "name": "WhatsApp Automation FIXED"
+    },
+    {
+      "createdAt": "2025-10-31T18:30:00.000Z",
+      "updatedAt": "2025-10-31T18:30:00.000Z", 
+      "id": "administracao-topweb",
+      "name": "Administração TOP WEB"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-10-31T18:30:00.000Z",
+  "versionId": "2.0.0",
+  "meta": {
+    "description": "🔥 Workflow CORRIGIDO que envia mensagens diárias para o grupo 'ADMINISTRAÇÃO - TOP WEB' usando o formato correto de ID (120363162966886315@g.us)",
+    "templateCreatedBy": {
+      "name": "n8n API Integration",
+      "id": "custom-nodes-whatsapp"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "WhatsApp Automation - Corrected Group Format",
+  "corrections": [
+    {
+      "node": "Enviar Z-API",
+      "issue": "WhatsApp Group ID format",
+      "current": "120363162966886315@g.us",
+      "recommended": "120363162966886315@g.us",
+      "explanation": "Grupo WhatsApp deve usar formato: ID@g.us"
+    },
+    {
+      "node": "Preparar Boards", 
+      "issue": "Phone preparation",
+      "current": "={{ $json.contact.phone }}@c.us",
+      "recommended": "={{ $json.contact.phone.replace(/[^0-9]/g, '').replace(/^55/, '') + '@c.us' }}",
+      "explanation": "Limpa o número e garante formato brasileiro correto"
+    },
+    {
+      "node": "Grupo WhatsApp",
+      "issue": "Group ID format",
+      "current": "120363162966886315@g.us",
+      "recommended": "120363162966886315@g.us",
+      "explanation": "ID do grupo ADMINISTRAÇÃO - TOP WEB corrigido"
+    }
+  ],
+  "validation_expression": "={{ $json.phone.includes('@c.us') ? $json.phone : $json.phone.replace(/[^0-9]/g, '') + '@c.us' }}",
+  "test_numbers": [
+    {
+      "input": "5511999999999",
+      "output": "5511999999999@c.us",
+      "valid": true
+    },
+    {
+      "input": "+55 (11) 99999-9999", 
+      "output": "5511999999999@c.us",
+      "valid": true
+    },
+    {
+      "input": "11999999999",
+      "output": "11999999999@c.us", 
+      "valid": true
+    }
+  ]
+}
